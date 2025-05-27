@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="lofi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoinTrack | Inicio</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.22/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col min-h-screen">
+  <div th:replace="~{layout/base :: header}"></div>
+
+  <!-- Hero Section -->
+  <header class="relative py-32">
+    <div class="container mx-auto text-center relative z-10 px-5">
+      <h1 class="text-7xl font-extrabold text-transparent bg-clip-text py-2 bg-gradient-to-r from-green-500 to-indigo-500">
+        Bienvenido a CoinTrack
+      </h1>
+      <p class="text-xl mt-4">Gestiona tus transacciones de manera fácil, rápida y segura</p>
+      <a href="#features" class="btn btn-primary mt-6 px-10 py-3 text-xl">Descubre más</a>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 bg-base-200">
+    <div class="container mx-auto text-center">
+      <h2 class="text-3xl font-bold text-gray-800">¿Por qué elegir CoinTrack?</h2>
+      <p class="text-lg text-gray-600 mt-4">Nuestra plataforma te permite gestionar tus ingresos y gastos de forma eficiente, con un diseño intuitivo y funcionalidad completa.</p>
+      <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div class="card bg-white shadow-lg rounded-xl p-6">
+          <h3 class="text-2xl font-semibold text-gray-800">Seguimiento fácil</h3>
+          <p class="text-gray-600 mt-2">Registra tus ingresos y gastos con un solo clic y mantén todo organizado sin esfuerzo.</p>
+        </div>
+        <div class="card bg-white shadow-lg rounded-xl p-6">
+          <h3 class="text-2xl font-semibold text-gray-800">Reportes detallados</h3>
+          <p class="text-gray-600 mt-2">Genera reportes detallados para comprender mejor tu flujo de dinero y tomar decisiones informadas.</p>
+        </div>
+        <div class="card bg-white shadow-lg rounded-xl p-6">
+          <h3 class="text-2xl font-semibold text-gray-800">Interfaz amigable</h3>
+          <p class="text-gray-600 mt-2">Nuestra plataforma cuenta con un diseño limpio y fácil de usar, lo que permite que cualquier usuario se sienta cómodo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-gradient-to-r from-green-600 to-indigo-600 text-white py-32">
+    <div class="container mx-auto text-center">
+      <h2 class="text-3xl font-bold">¡Comienza a gestionar tu dinero hoy mismo!</h2>
+      <p class="text-lg mt-4">Únete a CoinTrack y empieza a llevar el control de tus finanzas personales de manera sencilla.</p>
+      <a href="/transacciones" class="btn btn-accent mt-6 px-10 py-3 text-xl">Empieza ahora</a>
+    </div>
+  </section>
+
+  <footer class="flex justify-center p-2 bg-gray-800">
+    <p class="text-sm text-white">
+      Desarrollado por
+      <a href="https://alessandrorios.com" target="_blank" class="underline hover:text-blue-300">Diego Alessandro Rios Villegas</a>
+    </p>
+  </footer>
+</body>
+</html>

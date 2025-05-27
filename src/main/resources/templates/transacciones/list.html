@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html
+  lang="es"
+  xmlns:th="http://www.thymeleaf.org"
+  data-theme="lofi">
+<head>
+<meta charset="UTF-8">
+<title>CoinTrack | Transacciones</title>
+<link
+  href="https://cdn.jsdelivr.net/npm/daisyui@4.12.22/dist/full.min.css"
+  rel="stylesheet"
+  type="text/css" />
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div th:replace="~{layout/base :: header}"></div>
+  <main class="flex flex-col gap-2 p-5">
+    <header class="flex flex-col gap-5 items-start my-5">
+      <h1 class="text-3xl font-bold">Resumen</h1>
+    </header>
+    <div
+      th:if="${not #lists.isEmpty(transacciones)}"
+      class="flex gap-5">
+      <div
+        class="flex flex-col items-center bg-base-200 grow p-2 rounded-xl">
+        <span class="text-green-600 font-bold">Ingresos: </span>
+        <span
+          th:text="|S/ ${totalIngresos}|"
+          class="text-2xl font-bold"></span>
+      </div>
+      <div
+        class="flex flex-col items-center bg-base-200 grow p-2 rounded-xl">
+        <span class="text-red-600 font-bold">Gastos: </span>
+        <span
+          th:text="|S/ ${totalGastos}|"
+          class="text-2xl font-bold"></span>
+      </div>
+      <div
+        class="flex flex-col items-center bg-base-200 grow p-2 rounded-xl">
+        <span
+          th:class="${balance < 0 ? 'font-bold text-red-700' : 'font-bold text-green-700'}">Saldo:
+        </span>
+        <span
+          th:text="|S/ ${balance}|"
+          class="font-bold text-2xl"></span>
+      </div>
+    </div>
+    <div class="flex justify-between gap-5 items-start mt-10">
+      <div class="flex flex-col">
+        <h2 class="text-xl font-bold">Lista de transacciones</h2>
+        <p class="text-gray-500">Encuentra aquí todas tus
+          transacciones.</p>
+      </div>
+      <div class="flex gap-5 items-center">
+        <a
+          class="btn btn-sm btn-primary"
+          th:href="@{/transacciones/new?usuarioId={usuarioId}(usuarioId=${usuarioId})}">Agregar</a>
+        <a
+          th:href="@{/transacciones/export?usuarioId={usuarioId}(usuarioId=${usuarioId})}"
+          class="btn btn-sm btn-success">Exportar a Excel</a>
+      </div>
+    </div>
+    <div
+      th:if="${#lists.isEmpty(transacciones)}"
+      class="text-muted">No hay transacciones disponibles.</div>
+    <table
+      class="table table-zebra w-full text-center mt-5"
+      th:if="${not #lists.isEmpty(transacciones)}">
+      <thead>
+        <tr class="bg-primary text-white text-base">
+          <th
+            class="cursor-pointer underline border border-white"
+            onclick="sortTable(0)">Descripción</th>
+          <th
+            class="cursor-pointer underline border border-white"
+            onclick="sortTable(1)">Monto</th>
+          <th
+            class="cursor-pointer underline border border-white"
+            onclick="sortTable(2)">Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="transacciones-body">
+        <tr th:each="transaccion : ${transacciones}">
+          <td
+            class="text-left"
+            th:text="${transaccion.descripcion}"></td>
+          <td
+            th:class="${transaccion.tipo.toString() == 'INGRESO' ? 'font-bold text-green-600' : 'font-bold text-red-600'}"
+            th:text="${transaccion.tipo.toString() == 'INGRESO' ? '+ S/' + transaccion.monto : '- S/' + transaccion.monto}">
+          </td>
+          <td th:text="${transaccion.fecha}"></td>
+          <td class="flex justify-end"><a
+              class="btn grow btn-sm btn-success"
+              th:href="@{/transacciones/{id}/edit(id=${transaccion.id})}">Editar</a>
+            <button
+              id="deleteBtn"
+              th:attr="data-id=${transaccion.id}"
+              class="btn grow btn-sm btn-error ml-2"
+              data-modal="deleteModal">Eliminar</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Dialog para confirmar eliminación -->
+    <div
+      id="deleteModal"
+      class="modal">
+      <div class="modal-box">
+        <h2 class="text-lg font-bold">Confirmar eliminación</h2>
+        <p>¿Estás seguro de que deseas eliminar esta transacción?</p>
+        <div class="mt-4 flex justify-end">
+          <button
+            class="btn btn-error"
+            id="confirmDeleteBtn">Eliminar</button>
+          <button
+            class="btn btn-secondary ml-2"
+            id="cancelDeleteBtn">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Lógica para mostrar el diálogo de confirmación de eliminación
+    const deleteBtns = document.querySelectorAll('[data-modal="deleteModal"]');
+    const modal = document.getElementById('deleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    let deleteId = null;
+
+    deleteBtns.forEach(button => {
+      button.addEventListener('click', (e) => {
+        deleteId = e.target.getAttribute('data-id');
+        modal.classList.add('modal-open');
+      });
+    });
+
+    cancelDeleteBtn.addEventListener('click', () => {
+      modal.classList.remove('modal-open');
+    });
+
+    confirmDeleteBtn.addEventListener('click', () => {
+      if (deleteId) {
+        window.location.href = `/transacciones/${deleteId}/delete`;
+      }
+    });
+    
+    // Lógica para filtros en tabla
+      let sortDirection = false; // true: Ascendente, false: Descendente
+      let currentColumnIndex = 1; // Columna por defecto para ordenar (puedes cambiar esto según la necesidad)
+      
+      function getSortFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const columnIndex = parseInt(urlParams.get('columnIndex'), 10);
+        const sort = urlParams.get('sort') === 'false' ? false : true;
+      
+        if (!isNaN(columnIndex)) {
+          currentColumnIndex = columnIndex;
+        }
+        sortDirection = sort;
+      }
+      
+      function updateUrlParams(columnIndex, sort) {
+        const url = new URL(window.location);
+        url.searchParams.set('columnIndex', columnIndex);
+        url.searchParams.set('sort', sort);
+        window.history.pushState({}, '', url);
+      }
+      
+      function sortTable(columnIndex, sort) {
+        const finalSort = sort == null ? sortDirection : sort;
+        const tableBody = document.getElementById("transacciones-body");
+        const rows = Array.from(tableBody.rows);
+      
+        rows.sort((a, b) => {
+          const cellA = a.cells[columnIndex].innerText.trim();
+          const cellB = b.cells[columnIndex].innerText.trim();
+      
+          if (columnIndex == 1) {
+            // Monto, primero capturar sólo el número
+            const regex = /(\d+(\.\d+)?)/;
+            const numA = parseFloat(cellA.match(regex)[0]);
+            const numB = parseFloat(cellB.match(regex)[0]);
+      
+            return finalSort ? numA - numB : numB - numA;
+          } else {
+            return finalSort ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+          }
+        });
+      
+        // Reordenar las filas en la tabla
+        tableBody.innerHTML = "";
+        rows.forEach(row => tableBody.appendChild(row));
+      
+        // Alternar dirección de orden
+        sortDirection = !sortDirection;
+      
+        // Actualizar los parámetros de la URL
+        updateUrlParams(columnIndex, finalSort);
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        // Obtener los parámetros de la URL y aplicar la ordenación inicial
+        getSortFromUrl();
+        sortTable(currentColumnIndex, sortDirection);
+      });
+  </script>
+</body>
+</html>
